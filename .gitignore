@@ -1,0 +1,24 @@
+# Rust
+/target/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+
+# Build artifacts
+build/
+
+# Dependencies
+vendor/
