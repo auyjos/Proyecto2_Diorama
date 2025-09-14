@@ -13,6 +13,71 @@ use std::f32::consts::PI;
 const SHADOW_BIAS: f32 = 1e-4;
 const MAX_RECURSION_DEPTH: i32 = 3;
 
+// Eclipse skybox function - Creates the dramatic Berserk Eclipse atmosphere
+fn skybox_color(ray_direction: &Vector3) -> Color {
+    // Normalize ray direction
+    let dir = ray_direction.normalized();
+    
+    // Calculate spherical coordinates
+    let theta = dir.y.asin(); // Elevation angle (-π/2 to π/2)
+    let phi = dir.z.atan2(dir.x); // Azimuthal angle (-π to π)
+    
+    // Eclipse position (high in the sky, slightly offset)
+    let eclipse_theta = 0.7; // High elevation
+    let eclipse_phi = 0.2;   // Slightly to the right
+    
+    // Calculate angular distance to eclipse center
+    let d_theta = theta - eclipse_theta;
+    let d_phi = phi - eclipse_phi;
+    let angular_dist = (d_theta * d_theta + d_phi * d_phi).sqrt();
+    
+    // Eclipse parameters
+    let eclipse_radius = 0.15; // Size of the eclipse
+    let corona_radius = 0.25;  // Corona effect radius
+    
+    if angular_dist < eclipse_radius {
+        // Inside the eclipse - very dark with subtle red rim
+        if angular_dist > eclipse_radius * 0.8 {
+            // Red rim of the eclipse
+            return Color::new(80, 20, 10);
+        } else {
+            // Dark center
+            return Color::new(20, 5, 5);
+        }
+    } else if angular_dist < corona_radius {
+        // Corona effect - bright red/orange glow
+        let corona_factor = 1.0 - (angular_dist - eclipse_radius) / (corona_radius - eclipse_radius);
+        let intensity = (corona_factor * 255.0) as u8;
+        return Color::new(intensity, (intensity as f32 * 0.6) as u8, (intensity as f32 * 0.2) as u8);
+    }
+    
+    // Sky gradient based on elevation
+    let elevation_factor = (theta + 1.57) / 3.14; // Normalize to 0-1
+    
+    if elevation_factor > 0.7 {
+        // Upper sky - dark red/black
+        let factor = (elevation_factor - 0.7) / 0.3;
+        let r = (80.0 * (1.0 - factor) + 20.0 * factor) as u8;
+        let g = (20.0 * (1.0 - factor) + 5.0 * factor) as u8;
+        let b = (10.0 * (1.0 - factor) + 5.0 * factor) as u8;
+        Color::new(r, g, b)
+    } else if elevation_factor > 0.3 {
+        // Middle sky - deep red
+        let factor = (elevation_factor - 0.3) / 0.4;
+        let r = (120.0 * (1.0 - factor) + 80.0 * factor) as u8;
+        let g = (30.0 * (1.0 - factor) + 20.0 * factor) as u8;
+        let b = (15.0 * (1.0 - factor) + 10.0 * factor) as u8;
+        Color::new(r, g, b)
+    } else {
+        // Lower sky/horizon - darker red with some orange
+        let factor = elevation_factor / 0.3;
+        let r = (60.0 * factor + 40.0 * (1.0 - factor)) as u8;
+        let g = (15.0 * factor + 8.0 * (1.0 - factor)) as u8;
+        let b = (8.0 * factor + 5.0 * (1.0 - factor)) as u8;
+        Color::new(r, g, b)
+    }
+}
+
 // Enum to handle different object types
 #[derive(Clone)]
 pub enum Object {
@@ -150,7 +215,7 @@ pub fn cast_ray(
     }
 
     if !intersect.is_intersecting {
-        return Color::new(135, 206, 235); // Color del cielo
+        return skybox_color(ray_direction); // Usar skybox en lugar de color fijo
     }
 
     let closest_object = closest_object.unwrap();

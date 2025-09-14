@@ -38,95 +38,205 @@ fn main() {
     framebuffer.set_background_color(raylib::color::Color::new(135, 206, 235, 255));
     framebuffer.clear();
 
-    // Create textures
+    // Create textures for the Eclipse diorama
     let textures = vec![
-        Texture::checkerboard(64, 64, Color::new(255, 255, 255), Color::new(0, 0, 0)),     // 0: Checkerboard
-        Texture::brick(64, 64),                                                             // 1: Brick
-        Texture::wood(64, 64),                                                              // 2: Wood
-        Texture::marble(64, 64),                                                            // 3: Marble
-        Texture::metal(64, 64),                                                             // 4: Metal
+        Texture::checkerboard(64, 64, Color::new(255, 255, 255), Color::new(0, 0, 0)),     // 0: Checkerboard (kept for reference)
+        Texture::ancient_stone(64, 64),                                                     // 1: Ancient stone for ruins
+        Texture::rusted_metal(64, 64),                                                      // 2: Rusted metal for weapons/armor
+        Texture::blood_water(64, 64),                                                       // 3: Blood water for pools
+        Texture::dark_crystal(64, 64),                                                      // 4: Dark crystal for mystical elements
+        Texture::charred_wood(64, 64),                                                      // 5: Charred wood for burnt structures
     ];
 
-    // Create objects - Mix of cubes and spheres with different materials and textures
-    let objects = vec![
-        // Textured cubes
-        Object::Cube(
-            Cube::new(Vector3::new(-3.0, 0.0, -5.0), 2.0, Material::ivory())
-                .with_texture(0) // Checkerboard
-        ),
-        Object::Cube(
-            Cube::new(Vector3::new(0.0, 0.0, -4.0), 2.0, Material::new(
-                Color::new(139, 69, 19), // Brick color base
-                50.0,
-                [0.8, 0.2, 0.0, 0.0],
-                1.0,
-                0.0,
-            )).with_texture(1) // Brick texture
-        ),
-        Object::Cube(
-            Cube::new(Vector3::new(3.0, 0.0, -5.0), 2.0, Material::mirror())
-                .with_texture(4) // Metal texture
-        ),
-        Object::Cube(
-            Cube::new(Vector3::new(0.0, 2.5, -4.5), 2.0, Material::glass())
-                .with_texture(3) // Marble texture
-        ),
+    // BERSERK ECLIPSE DIORAMA - COHERENT CONCRETE & METAL DESIGN
+    let mut objects = vec![];
+    
+    // === SOLID FOUNDATION PLATFORM (No floating elements) ===
+    
+    // Main concrete foundation (7x7 platform on ground level)
+    for x in -3..4 {
+        for z in -3..4 {
+            objects.push(Object::Cube(
+                Cube::new(Vector3::new(x as f32, -1.0, z as f32), 1.0, Material::concrete())
+                    .with_texture(1)
+            ));
+        }
+    }
+    
+    // === CENTRAL STEPPED PLATFORM (Metal reinforcement) ===
+    
+    // Level 1: Metal reinforced concrete (5x5)
+    for x in -2..3 {
+        for z in -2..3 {
+            objects.push(Object::Cube(
+                Cube::new(Vector3::new(x as f32, 0.0, z as f32), 1.0, Material::polished_metal())
+                    .with_texture(2)
+            ));
+        }
+    }
+    
+    // Level 2: Central altar (3x3 concrete)
+    for x in -1..2 {
+        for z in -1..2 {
+            objects.push(Object::Cube(
+                Cube::new(Vector3::new(x as f32, 1.0, z as f32), 1.0, Material::concrete())
+                    .with_texture(1)
+            ));
+        }
+    }
+    
+    // === CENTRAL ECLIPSE MONUMENT ===
+    
+    // Concrete pedestal
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(0.0, 2.0, 0.0), 1.0, Material::concrete())
+            .with_texture(1)
+    ));
+    
+    // Eclipse crystal on top
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(0.0, 3.0, 0.0), 0.6, Material::red_crystal())
+            .with_texture(4)
+    ));
+    
+    // === CORNER METAL PILLARS (Properly supported on foundation) ===
+    
+    // Four corner pillars on the foundation corners
+    let corner_positions = [(-3.0, 3.0), (3.0, 3.0), (-3.0, -3.0), (3.0, -3.0)];
+    
+    for (x, z) in corner_positions.iter() {
+        // Metal pillar base (on foundation level)
+        objects.push(Object::Cube(
+            Cube::new(Vector3::new(*x, -0.5, *z), 0.8, Material::polished_metal())
+                .with_texture(2)
+        ));
         
-        // Large cube as "floor" with wood texture
-        Object::Cube(
-            Cube::new(Vector3::new(0.0, -1002.0, -1.0), 2000.0, Material::new(
-                Color::new(139, 115, 85), // Wood color base
-                20.0,
-                [0.7, 0.3, 0.1, 0.0],
-                1.0,
-                0.0,
-            )).with_texture(2) // Wood texture
-        ),
-    ];
+        // Metal pillar middle
+        objects.push(Object::Cube(
+            Cube::new(Vector3::new(*x, 0.5, *z), 0.8, Material::polished_metal())
+                .with_texture(2)
+        ));
+        
+        // Metal pillar top
+        objects.push(Object::Cube(
+            Cube::new(Vector3::new(*x, 1.5, *z), 0.8, Material::polished_metal())
+                .with_texture(2)
+        ));
+        
+        // Rusted metal cap
+        objects.push(Object::Cube(
+            Cube::new(Vector3::new(*x, 2.5, *z), 0.6, Material::rusted_metal())
+                .with_texture(5)
+        ));
+    }
+    
+    // === DECORATIVE WATER FEATURES (On platform surfaces) ===
+    
+    // Small water pools on the metal platform (Level 1)
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(-1.5, 0.5, 0.0), 0.4, Material::dark_water())
+            .with_texture(3)
+    ));
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(1.5, 0.5, 0.0), 0.4, Material::dark_water())
+            .with_texture(3)
+    ));
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(0.0, 0.5, -1.5), 0.4, Material::dark_water())
+            .with_texture(3)
+    ));
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(0.0, 0.5, 1.5), 0.4, Material::dark_water())
+            .with_texture(3)
+    ));
+    
+    // Crystal accents on the concrete level (Level 2)
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(-0.7, 1.5, 0.7), 0.3, Material::red_crystal())
+            .with_texture(4)
+    ));
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(0.7, 1.5, -0.7), 0.3, Material::red_crystal())
+            .with_texture(4)
+    ));
+    
+    // === GROUND PLANE ===
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(0.0, -1002.0, 0.0), 2000.0, Material::ancient_stone())
+            .with_texture(1)
+    ));
 
-    // Initialize camera - Mejor posición inicial
+    // Camera positioned for optimal Eclipse diorama view
     let mut camera = CustomCamera::new(
-        Vector3::new(0.0, 1.0, 8.0),     // Más lejos y ligeramente elevada
-        Vector3::new(0.0, 0.0, -4.0),    // Mirando hacia el centro de la escena
+        Vector3::new(5.0, 5.0, 5.0),     // Better angle to see all pillars and structure
+        Vector3::new(0.0, 1.5, 0.0),     // Looking slightly up at the monument
         Vector3::new(0.0, 1.0, 0.0)      // Up vector
     );
-    let rotation_speed = PI / 50.0;
+    let rotation_speed = PI / 60.0; // Slower rotation for cinematic feel
+    let zoom_speed = 0.3;
 
-    // Múltiples luces - Mejor posicionamiento e intensidad
+        // ECLIPSE DRAMATIC LIGHTING - Final optimized version
     let lights = [
-        // Luz principal (blanca, arriba y adelante)
+        // Main Eclipse light from above (dramatic red-orange)
         Light::new(
-            Vector3::new(-3.0, 4.0, 1.0),
-            Color::new(255, 255, 255),
-            1.5 // Más intensa
+            Vector3::new(0.0, 10.0, 0.0),
+            Color::new(255, 200, 150),
+            2.2
         ),
-        // Luz de relleno (cálida, desde otro ángulo)
+        // Central crystal glow (red mystical light)
         Light::new(
-            Vector3::new(3.0, 2.0, -1.0),
-            Color::new(255, 220, 180),
+            Vector3::new(0.0, 3.5, 0.0),
+            Color::new(200, 50, 80),
+            1.5
+        ),
+        // Corner pillar lights (warm metal glow) - optimized positions
+        Light::new(
+            Vector3::new(-3.0, 2.8, 3.0),
+            Color::new(255, 180, 120), // Warm orange glow
             1.0
         ),
-        // Luz trasera sutil (para destacar bordes)
         Light::new(
-            Vector3::new(0.0, 1.0, -8.0),
-            Color::new(200, 200, 255),
-            0.6
+            Vector3::new(3.0, 2.8, 3.0),
+            Color::new(255, 180, 120), // Warm orange glow
+            1.0
         ),
+        Light::new(
+            Vector3::new(-3.0, 2.8, -3.0),
+            Color::new(255, 180, 120), // Warm orange glow
+            1.0
+        ),
+        Light::new(
+            Vector3::new(3.0, 2.8, -3.0),
+            Color::new(255, 180, 120), // Warm orange glow
+            1.0
+        )
     ];
 
     while !window.window_should_close() {
-        // Camera orbit controls
-        if window.is_key_down(KeyboardKey::KEY_LEFT) {
+        // Enhanced camera controls for the Eclipse diorama
+        if window.is_key_down(KeyboardKey::KEY_LEFT) || window.is_key_down(KeyboardKey::KEY_A) {
             camera.orbit(rotation_speed, 0.0);
         }
-        if window.is_key_down(KeyboardKey::KEY_RIGHT) {
+        if window.is_key_down(KeyboardKey::KEY_RIGHT) || window.is_key_down(KeyboardKey::KEY_D) {
             camera.orbit(-rotation_speed, 0.0);
         }
-        if window.is_key_down(KeyboardKey::KEY_UP) {
+        if window.is_key_down(KeyboardKey::KEY_UP) || window.is_key_down(KeyboardKey::KEY_W) {
             camera.orbit(0.0, -rotation_speed);
         }
-        if window.is_key_down(KeyboardKey::KEY_DOWN) {
+        if window.is_key_down(KeyboardKey::KEY_DOWN) || window.is_key_down(KeyboardKey::KEY_S) {
             camera.orbit(0.0, rotation_speed);
+        }
+        
+        // Zoom controls
+        if window.is_key_down(KeyboardKey::KEY_Q) || window.is_key_down(KeyboardKey::KEY_Z) {
+            // Zoom in - move camera closer to center
+            let direction = (camera.center - camera.eye).normalized();
+            camera.eye = camera.eye + direction * zoom_speed;
+        }
+        if window.is_key_down(KeyboardKey::KEY_E) || window.is_key_down(KeyboardKey::KEY_X) {
+            // Zoom out - move camera away from center
+            let direction = (camera.center - camera.eye).normalized();
+            camera.eye = camera.eye - direction * zoom_speed;
         }
 
         // Check if window was resized

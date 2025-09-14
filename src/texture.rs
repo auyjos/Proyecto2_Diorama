@@ -188,4 +188,171 @@ impl Texture {
         
         texture
     }
+
+    // Create ancient stone texture for ruins
+    pub fn ancient_stone(width: u32, height: u32) -> Self {
+        let mut texture = Texture::new(width, height);
+        
+        let base_color = Color::new(120, 110, 95);
+        let crack_color = Color::new(60, 55, 45);
+        let moss_color = Color::new(40, 60, 30);
+        
+        for y in 0..height {
+            for x in 0..width {
+                let noise1 = ((x * 7 + y * 11) % 100) as f32 / 100.0;
+                let noise2 = ((x * 13 + y * 17) % 100) as f32 / 100.0;
+                
+                // Create cracks and weathering
+                let crack_factor = if noise1 > 0.85 { 0.3 } else { 1.0 };
+                
+                // Add moss patches
+                let moss_factor = if noise2 > 0.9 { 0.7 } else { 1.0 };
+                
+                let color = if crack_factor < 1.0 {
+                    crack_color
+                } else if moss_factor < 1.0 {
+                    Color::new(
+                        ((base_color.r as f32 * 0.6) + (moss_color.r as f32 * 0.4)) as u8,
+                        ((base_color.g as f32 * 0.6) + (moss_color.g as f32 * 0.4)) as u8,
+                        ((base_color.b as f32 * 0.6) + (moss_color.b as f32 * 0.4)) as u8,
+                    )
+                } else {
+                    base_color
+                };
+                
+                let index = (y * width + x) as usize;
+                texture.data[index] = color;
+            }
+        }
+        
+        texture
+    }
+
+    // Create rusted metal texture
+    pub fn rusted_metal(width: u32, height: u32) -> Self {
+        let mut texture = Texture::new(width, height);
+        
+        let metal_color = Color::new(140, 140, 150);
+        let rust_color = Color::new(139, 69, 19);
+        let dark_rust = Color::new(101, 45, 12);
+        
+        for y in 0..height {
+            for x in 0..width {
+                let noise1 = ((x * 9 + y * 13) % 100) as f32 / 100.0;
+                let noise2 = ((x * 15 + y * 7) % 100) as f32 / 100.0;
+                
+                let rust_intensity = (noise1 + noise2 * 0.5) / 1.5;
+                
+                let color = if rust_intensity > 0.7 {
+                    rust_color
+                } else if rust_intensity > 0.4 {
+                    Color::new(
+                        ((metal_color.r as f32 * (1.0 - rust_intensity)) + (rust_color.r as f32 * rust_intensity)) as u8,
+                        ((metal_color.g as f32 * (1.0 - rust_intensity)) + (rust_color.g as f32 * rust_intensity)) as u8,
+                        ((metal_color.b as f32 * (1.0 - rust_intensity)) + (rust_color.b as f32 * rust_intensity)) as u8,
+                    )
+                } else if rust_intensity < 0.1 {
+                    dark_rust
+                } else {
+                    metal_color
+                };
+                
+                let index = (y * width + x) as usize;
+                texture.data[index] = color;
+            }
+        }
+        
+        texture
+    }
+
+    // Create blood/water texture with ripple effect
+    pub fn blood_water(width: u32, height: u32) -> Self {
+        let mut texture = Texture::new(width, height);
+        
+        let blood_color = Color::new(120, 20, 20);
+        let dark_blood = Color::new(80, 10, 10);
+        
+        for y in 0..height {
+            for x in 0..width {
+                let center_x = width as f32 / 2.0;
+                let center_y = height as f32 / 2.0;
+                
+                let distance = ((x as f32 - center_x).powi(2) + (y as f32 - center_y).powi(2)).sqrt();
+                let ripple = ((distance * 0.3).sin() * 0.3 + 0.7).clamp(0.0, 1.0);
+                
+                let color = Color::new(
+                    ((blood_color.r as f32 * ripple) + (dark_blood.r as f32 * (1.0 - ripple))) as u8,
+                    ((blood_color.g as f32 * ripple) + (dark_blood.g as f32 * (1.0 - ripple))) as u8,
+                    ((blood_color.b as f32 * ripple) + (dark_blood.b as f32 * (1.0 - ripple))) as u8,
+                );
+                
+                let index = (y * width + x) as usize;
+                texture.data[index] = color;
+            }
+        }
+        
+        texture
+    }
+
+    // Create dark crystal texture
+    pub fn dark_crystal(width: u32, height: u32) -> Self {
+        let mut texture = Texture::new(width, height);
+        
+        let crystal_color = Color::new(40, 20, 60);
+        let highlight_color = Color::new(120, 80, 140);
+        let shadow_color = Color::new(20, 10, 30);
+        
+        for y in 0..height {
+            for x in 0..width {
+                let facet_x = (x / 8) * 8;
+                let facet_y = (y / 8) * 8;
+                
+                let distance_to_facet = ((x as f32 - facet_x as f32).powi(2) + (y as f32 - facet_y as f32).powi(2)).sqrt();
+                
+                let color = if distance_to_facet < 2.0 {
+                    highlight_color
+                } else if distance_to_facet > 6.0 {
+                    shadow_color
+                } else {
+                    crystal_color
+                };
+                
+                let index = (y * width + x) as usize;
+                texture.data[index] = color;
+            }
+        }
+        
+        texture
+    }
+
+    // Create charred wood texture
+    pub fn charred_wood(width: u32, height: u32) -> Self {
+        let mut texture = Texture::new(width, height);
+        
+        let char_color = Color::new(30, 25, 20);
+        let burnt_color = Color::new(60, 45, 30);
+        let ash_color = Color::new(80, 75, 70);
+        
+        for y in 0..height {
+            for x in 0..width {
+                // Create wood grain pattern
+                let grain = ((y as f32 / 4.0).sin() * 0.5 + 0.5);
+                let noise = ((x * 17 + y * 23) % 100) as f32 / 100.0;
+                let burn_intensity = grain * noise;
+                
+                let color = if burn_intensity > 0.8 {
+                    ash_color
+                } else if burn_intensity > 0.4 {
+                    burnt_color
+                } else {
+                    char_color
+                };
+                
+                let index = (y * width + x) as usize;
+                texture.data[index] = color;
+            }
+        }
+        
+        texture
+    }
 }
