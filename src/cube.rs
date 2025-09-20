@@ -1,7 +1,6 @@
 use raylib::prelude::*;
 use crate::ray_intersect::{Intersect, RayIntersect};
 use crate::material::Material;
-use crate::texture::Texture;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Cube {
@@ -24,6 +23,28 @@ impl Cube {
                 center.x + half_size,
                 center.y + half_size,
                 center.z + half_size
+            ),
+            material,
+            texture_id: None,
+        }
+    }
+
+    // Create a flat rectangular platform (for bases)
+    pub fn new_flat(center: Vector3, width: f32, height: f32, depth: f32, material: Material) -> Self {
+        let half_width = width / 2.0;
+        let half_height = height / 2.0;
+        let half_depth = depth / 2.0;
+        
+        Cube {
+            min: Vector3::new(
+                center.x - half_width,
+                center.y - half_height, 
+                center.z - half_depth
+            ),
+            max: Vector3::new(
+                center.x + half_width,
+                center.y + half_height,
+                center.z + half_depth
             ),
             material,
             texture_id: None,
@@ -77,10 +98,9 @@ impl Cube {
 impl RayIntersect for Cube {
     fn ray_intersect(&self, ray_origin: &Vector3, ray_direction: &Vector3) -> Intersect {
         // Slab method for ray-cube intersection
-        let mut t_min = f32::NEG_INFINITY;
-        let mut t_max = f32::INFINITY;
-        let mut normal = Vector3::new(0.0, 0.0, 0.0);
-        let mut hit_normal = Vector3::new(0.0, 0.0, 0.0);
+    let mut t_min = f32::NEG_INFINITY;
+    let mut t_max = f32::INFINITY;
+    let mut hit_normal = Vector3::new(0.0, 0.0, 0.0);
 
         // Check intersection with X slabs
         if ray_direction.x.abs() < 1e-8 {
@@ -175,9 +195,7 @@ impl RayIntersect for Cube {
         
         if t > 0.0 {
             let point = *ray_origin + *ray_direction * t;
-            normal = hit_normal;
-            
-            return Intersect::new(point, normal, t, self.material);
+            return Intersect::new(point, hit_normal, t, self.material);
         }
 
         Intersect::empty()

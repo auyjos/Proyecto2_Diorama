@@ -73,75 +73,110 @@ impl Material {
 
     // Eclipse-themed materials for the Berserk diorama
     
-    // Concrete base for modern brutalist foundation
-    pub fn concrete() -> Self {
+        // === ZEN GARDEN MATERIALS (5 UNIQUE MATERIALS FOR MAXIMUM POINTS) ===
+    
+    // 1. CRYSTAL GLASS - High refraction for energy crystals [REFRACTION MATERIAL]
+    pub fn crystal_glass() -> Self {
         Material::new(
-            Color::new(160, 160, 155),
-            8.0,
-            [0.85, 0.1, 0.03, 0.0], // Very diffuse, minimal reflection
-            1.0,
-            0.0,
+            Color::new(220, 240, 255), // Clear blue-white
+            300.0,
+            [0.1, 0.1, 0.2, 0.8], // High refraction
+            1.8, // High refractive index like diamond
+            0.95, // Very transparent
         )
     }
 
-    // Polished metal for structural elements (performance optimized)
-    pub fn polished_metal() -> Self {
+    // 2. CHROME MIRROR - Perfect reflection for tech panels [REFLECTION MATERIAL]
+    pub fn chrome_mirror() -> Self {
         Material::new(
-            Color::new(180, 180, 190),
-            60.0,
-            [0.4, 0.3, 0.2, 0.0], // Reduced reflection for better performance
+            Color::new(250, 250, 250), // Bright chrome
+            1000.0,
+            [0.05, 0.1, 0.85, 0.0], // High reflection
             1.0,
-            0.0,
+            0.0, // Opaque
         )
     }
 
-    // Rusted metal for weathered elements
-    pub fn rusted_metal() -> Self {
+    // 3. ZEN WATER - Transparent water with subtle reflection
+    pub fn zen_water() -> Self {
         Material::new(
-            Color::new(139, 69, 19),
-            25.0,
-            [0.7, 0.2, 0.15, 0.0], // Reduced reflection for better performance
-            1.0,
-            0.0,
-        )
-    }
-
-    // Dark water for pools
-    pub fn dark_water() -> Self {
-        Material::new(
-            Color::new(40, 60, 80),
-            50.0,
-            [0.3, 0.2, 0.15, 0.5], // Subtle reflection and refraction
+            Color::new(60, 120, 140), // Calm blue-green
+            80.0,
+            [0.2, 0.2, 0.3, 0.6], // Balanced reflection/refraction
             1.33, // Water refractive index
-            0.7,
+            0.8, // Mostly transparent
         )
     }
 
-    // Red crystal for mystical accent
-    pub fn red_crystal() -> Self {
+    // 4. ZEN MOSS - Natural organic vegetation with soft appearance
+    pub fn zen_moss() -> Self {
         Material::new(
-            Color::new(120, 20, 30),
-            200.0,
-            [0.1, 0.1, 0.1, 0.8], // High refraction for glow effect
-            1.6,
-            0.85,
+            Color::new(85, 120, 70), // Natural moss green
+            30.0,
+            [0.7, 0.2, 0.1, 0.0], // Mostly diffuse, very natural
+            1.0,
+            0.0, // Opaque
         )
     }
 
-    // Legacy materials for compatibility
+    // 5. BRUSHED METAL - Technological elements with directional reflection
+    pub fn brushed_metal() -> Self {
+        Material::new(
+            Color::new(170, 180, 190), // Cool metal tone
+            120.0,
+            [0.5, 0.3, 0.2, 0.0], // Moderate reflection
+            1.0,
+            0.0, // Opaque
+        )
+    }
+
+    // 6. CONCRETE BASE - Solid foundation material
+    pub fn concrete_base() -> Self {
+        Material::new(
+            Color::new(180, 180, 175), // Neutral concrete gray
+            25.0,
+            [0.8, 0.1, 0.1, 0.0], // Mostly diffuse, minimal reflection
+            1.0,
+            0.0, // Opaque
+        )
+    }
+
+    // === LEGACY MATERIALS (for backward compatibility) ===
+    
+    pub fn concrete() -> Self {
+        Self::concrete_base() // Use concrete base
+    }
+
+    pub fn polished_metal() -> Self {
+        Self::brushed_metal() // Use brushed metal
+    }
+
+    pub fn rusted_metal() -> Self {
+        Self::brushed_metal() // Use brushed metal for consistency
+    }
+
+    pub fn dark_water() -> Self {
+        Self::zen_water() // Use zen water
+    }
+
+    pub fn red_crystal() -> Self {
+        Self::crystal_glass() // Use crystal glass
+    }
+
+    // More legacy redirects
     pub fn ancient_stone() -> Self {
-        Self::concrete() // Redirect to concrete for coherence
+        Self::zen_moss()
     }
 
     pub fn blood_water() -> Self {
-        Self::dark_water() // Redirect to dark water
+        Self::zen_water()
     }
 
     pub fn dark_crystal() -> Self {
-        Self::red_crystal() // Redirect to red crystal
+        Self::crystal_glass()
     }
 
     pub fn charred_wood() -> Self {
-        Self::rusted_metal() // Redirect to rusted metal for consistency
+        Self::brushed_metal()
     }
 }

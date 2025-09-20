@@ -38,182 +38,282 @@ fn main() {
     framebuffer.set_background_color(raylib::color::Color::new(135, 206, 235, 255));
     framebuffer.clear();
 
-    // Create textures for the Eclipse diorama
+    // Create textures for the Zen Garden diorama (6 materials: 5 unique + concrete base)
     let textures = vec![
-        Texture::checkerboard(64, 64, Color::new(255, 255, 255), Color::new(0, 0, 0)),     // 0: Checkerboard (kept for reference)
-        Texture::ancient_stone(64, 64),                                                     // 1: Ancient stone for ruins
-        Texture::rusted_metal(64, 64),                                                      // 2: Rusted metal for weapons/armor
-        Texture::blood_water(64, 64),                                                       // 3: Blood water for pools
-        Texture::dark_crystal(64, 64),                                                      // 4: Dark crystal for mystical elements
-        Texture::charred_wood(64, 64),                                                      // 5: Charred wood for burnt structures
+        Texture::checkerboard(64, 64, Color::new(255, 255, 255), Color::new(0, 0, 0)),     // 0: Reference checkerboard
+        Texture::zen_moss(64, 64),                                                          // 1: Natural moss vegetation
+        Texture::brushed_metal(64, 64),                                                     // 2: Tech metal panels
+        Texture::zen_water(64, 64),                                                         // 3: Calm water surface
+        Texture::crystal_glass(64, 64),                                                     // 4: Prismatic crystal
+        Texture::chrome_mirror(64, 64),                                                     // 5: Reflective chrome
+        Texture::concrete_base(64, 64),                                                     // 6: Concrete foundation
     ];
 
-    // BERSERK ECLIPSE DIORAMA - COHERENT CONCRETE & METAL DESIGN
+    // === UNIFIED ZEN GARDEN - COHERENT MATERIAL GROUPS ===
     let mut objects = vec![];
     
-    // === SOLID FOUNDATION PLATFORM (No floating elements) ===
+    // === SOLID CONCRETE BASE (Foundation for everything) ===
     
-    // Main concrete foundation (7x7 platform on ground level)
-    for x in -3..4 {
-        for z in -3..4 {
+    // Large concrete foundation platform (11x11)
+    for x in -5..6 {
+        for z in -5..6 {
             objects.push(Object::Cube(
-                Cube::new(Vector3::new(x as f32, -1.0, z as f32), 1.0, Material::concrete())
-                    .with_texture(1)
+                Cube::new(Vector3::new(x as f32, -1.0, z as f32), 1.0, Material::concrete_base())
+                    .with_texture(6)
             ));
         }
     }
     
-    // === CENTRAL STEPPED PLATFORM (Metal reinforcement) ===
+    // === INSTALLATION 1: CENTRAL REFLECTION POND ===
+    // Combines: Water + Crystal + Chrome + Metal
+    // Theme: Central focal point showing water reflections and crystal refractions
     
-    // Level 1: Metal reinforced concrete (5x5)
-    for x in -2..3 {
-        for z in -2..3 {
-            objects.push(Object::Cube(
-                Cube::new(Vector3::new(x as f32, 0.0, z as f32), 1.0, Material::polished_metal())
-                    .with_texture(2)
-            ));
-        }
-    }
-    
-    // Level 2: Central altar (3x3 concrete)
+    // Water pond with integrated elements (3x3 arrangement)
     for x in -1..2 {
         for z in -1..2 {
             objects.push(Object::Cube(
-                Cube::new(Vector3::new(x as f32, 1.0, z as f32), 1.0, Material::concrete())
-                    .with_texture(1)
+                Cube::new(Vector3::new(x as f32, -0.5, z as f32), 1.0, Material::zen_water())
+                    .with_texture(3)
             ));
         }
     }
     
-    // === CENTRAL ECLIPSE MONUMENT ===
-    
-    // Concrete pedestal
+    // Central crystal formation emerging from water
     objects.push(Object::Cube(
-        Cube::new(Vector3::new(0.0, 2.0, 0.0), 1.0, Material::concrete())
+        Cube::new(Vector3::new(0.0, -0.2, 0.0), 0.8, Material::crystal_glass())
+            .with_texture(4)
+    ));
+    
+    // Chrome reflection panels around pond (N, S, E, W)
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(0.0, -0.3, -2.2), 1.5, Material::chrome_mirror())
+            .with_texture(5)
+    ));
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(0.0, -0.3, 2.2), 1.5, Material::chrome_mirror())
+            .with_texture(5)
+    ));
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(-2.2, -0.3, 0.0), 1.5, Material::chrome_mirror())
+            .with_texture(5)
+    ));
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(2.2, -0.3, 0.0), 1.5, Material::chrome_mirror())
+            .with_texture(5)
+    ));
+    
+    // Metal support structures for chrome panels
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(0.0, -0.5, -2.5), 0.6, Material::brushed_metal())
+            .with_texture(2)
+    ));
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(0.0, -0.5, 2.5), 0.6, Material::brushed_metal())
+            .with_texture(2)
+    ));
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(-2.5, -0.5, 0.0), 0.6, Material::brushed_metal())
+            .with_texture(2)
+    ));
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(2.5, -0.5, 0.0), 0.6, Material::brushed_metal())
+            .with_texture(2)
+    ));
+    
+    // === INSTALLATION 2: NORTHEAST ZEN GARDEN ===
+    // Combines: Moss + Crystal + Water + Metal
+    // Theme: Natural meditation area with technological accents
+    
+    // Moss garden cluster
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(3.5, -0.5, 3.5), 0.8, Material::zen_moss())
+            .with_texture(1)
+    ));
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(4.0, -0.5, 3.0), 0.6, Material::zen_moss())
+            .with_texture(1)
+    ));
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(3.0, -0.5, 4.0), 0.6, Material::zen_moss())
             .with_texture(1)
     ));
     
-    // Eclipse crystal on top
+    // Small water feature integrated with moss
     objects.push(Object::Cube(
-        Cube::new(Vector3::new(0.0, 3.0, 0.0), 0.6, Material::red_crystal())
+        Cube::new(Vector3::new(3.5, -0.3, 3.0), 0.4, Material::zen_water())
+            .with_texture(3)
+    ));
+    
+    // Crystal meditation point in moss
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(4.0, -0.2, 3.5), 0.3, Material::crystal_glass())
             .with_texture(4)
     ));
     
-    // === CORNER METAL PILLARS (Properly supported on foundation) ===
-    
-    // Four corner pillars on the foundation corners
-    let corner_positions = [(-3.0, 3.0), (3.0, 3.0), (-3.0, -3.0), (3.0, -3.0)];
-    
-    for (x, z) in corner_positions.iter() {
-        // Metal pillar base (on foundation level)
-        objects.push(Object::Cube(
-            Cube::new(Vector3::new(*x, -0.5, *z), 0.8, Material::polished_metal())
-                .with_texture(2)
-        ));
-        
-        // Metal pillar middle
-        objects.push(Object::Cube(
-            Cube::new(Vector3::new(*x, 0.5, *z), 0.8, Material::polished_metal())
-                .with_texture(2)
-        ));
-        
-        // Metal pillar top
-        objects.push(Object::Cube(
-            Cube::new(Vector3::new(*x, 1.5, *z), 0.8, Material::polished_metal())
-                .with_texture(2)
-        ));
-        
-        // Rusted metal cap
-        objects.push(Object::Cube(
-            Cube::new(Vector3::new(*x, 2.5, *z), 0.6, Material::rusted_metal())
-                .with_texture(5)
-        ));
-    }
-    
-    // === DECORATIVE WATER FEATURES (On platform surfaces) ===
-    
-    // Small water pools on the metal platform (Level 1)
+    // Metal accent element
     objects.push(Object::Cube(
-        Cube::new(Vector3::new(-1.5, 0.5, 0.0), 0.4, Material::dark_water())
-            .with_texture(3)
-    ));
-    objects.push(Object::Cube(
-        Cube::new(Vector3::new(1.5, 0.5, 0.0), 0.4, Material::dark_water())
-            .with_texture(3)
-    ));
-    objects.push(Object::Cube(
-        Cube::new(Vector3::new(0.0, 0.5, -1.5), 0.4, Material::dark_water())
-            .with_texture(3)
-    ));
-    objects.push(Object::Cube(
-        Cube::new(Vector3::new(0.0, 0.5, 1.5), 0.4, Material::dark_water())
-            .with_texture(3)
+        Cube::new(Vector3::new(3.0, -0.5, 3.5), 0.4, Material::brushed_metal())
+            .with_texture(2)
     ));
     
-    // Crystal accents on the concrete level (Level 2)
+    // === INSTALLATION 3: SOUTHWEST TECH GROVE ===
+    // Combines: Metal + Chrome + Crystal + Moss
+    // Theme: Technology integrated with nature
+    
+    // Metal platform base
     objects.push(Object::Cube(
-        Cube::new(Vector3::new(-0.7, 1.5, 0.7), 0.3, Material::red_crystal())
-            .with_texture(4)
-    ));
-    objects.push(Object::Cube(
-        Cube::new(Vector3::new(0.7, 1.5, -0.7), 0.3, Material::red_crystal())
-            .with_texture(4)
+        Cube::new(Vector3::new(-3.5, -0.5, -3.5), 1.2, Material::brushed_metal())
+            .with_texture(2)
     ));
     
-    // === GROUND PLANE ===
+    // Chrome tech panel
     objects.push(Object::Cube(
-        Cube::new(Vector3::new(0.0, -1002.0, 0.0), 2000.0, Material::ancient_stone())
+        Cube::new(Vector3::new(-3.5, -0.2, -3.5), 1.0, Material::chrome_mirror())
+            .with_texture(5)
+    ));
+    
+    // Moss growing around tech
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(-3.0, -0.5, -3.0), 0.5, Material::zen_moss())
             .with_texture(1)
+    ));
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(-4.0, -0.5, -3.0), 0.5, Material::zen_moss())
+            .with_texture(1)
+    ));
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(-3.0, -0.5, -4.0), 0.5, Material::zen_moss())
+            .with_texture(1)
+    ));
+    
+    // Crystal energy core
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(-3.5, 0.1, -3.5), 0.4, Material::crystal_glass())
+            .with_texture(4)
+    ));
+    
+    // === INSTALLATION 4: SOUTHEAST WATER CASCADE ===
+    // Combines: Water + Crystal + Chrome + Metal
+    // Theme: Flowing water with reflective and refractive elements
+    
+    // Stepped water pools
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(3.5, -0.4, -3.0), 0.8, Material::zen_water())
+            .with_texture(3)
+    ));
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(3.5, -0.5, -3.8), 0.6, Material::zen_water())
+            .with_texture(3)
+    ));
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(3.5, -0.3, -2.2), 0.6, Material::zen_water())
+            .with_texture(3)
+    ));
+    
+    // Crystal formations in water
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(3.5, -0.1, -3.0), 0.3, Material::crystal_glass())
+            .with_texture(4)
+    ));
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(3.5, -0.2, -3.8), 0.2, Material::crystal_glass())
+            .with_texture(4)
+    ));
+    
+    // Chrome reflection surface
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(4.2, -0.3, -3.0), 0.4, Material::chrome_mirror())
+            .with_texture(5)
+    ));
+    
+    // Metal support structure
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(4.2, -0.5, -3.0), 0.3, Material::brushed_metal())
+            .with_texture(2)
+    ));
+    
+    // === INSTALLATION 5: NORTHWEST HARMONY POINT ===
+    // Combines: All 5 materials in one balanced composition
+    // Theme: Complete material harmony showcase
+    
+    // Base moss platform
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(-3.5, -0.5, 3.5), 1.0, Material::zen_moss())
+            .with_texture(1)
+    ));
+    
+    // Metal support frame
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(-3.5, -0.3, 3.5), 0.8, Material::brushed_metal())
+            .with_texture(2)
+    ));
+    
+    // Small water feature
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(-3.5, -0.1, 3.5), 0.5, Material::zen_water())
+            .with_texture(3)
+    ));
+    
+    // Crystal centerpiece
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(-3.5, 0.1, 3.5), 0.3, Material::crystal_glass())
+            .with_texture(4)
+    ));
+    
+    // Chrome reflection accent
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(-3.0, -0.2, 3.0), 0.4, Material::chrome_mirror())
+            .with_texture(5)
     ));
 
-    // Camera positioned for optimal Eclipse diorama view
+    // Camera positioned for optimal zen garden viewing
     let mut camera = CustomCamera::new(
-        Vector3::new(5.0, 5.0, 5.0),     // Better angle to see all pillars and structure
-        Vector3::new(0.0, 1.5, 0.0),     // Looking slightly up at the monument
+        Vector3::new(8.0, 4.0, 8.0),     // Elevated position to see the full composition
+        Vector3::new(0.0, 1.0, 0.0),     // Looking at the center of the garden
         Vector3::new(0.0, 1.0, 0.0)      // Up vector
     );
-    let rotation_speed = PI / 60.0; // Slower rotation for cinematic feel
+    let rotation_speed = PI / 60.0; // Smooth rotation for zen experience
     let zoom_speed = 0.3;
 
-        // ECLIPSE DRAMATIC LIGHTING - Final optimized version
+    // ZEN GARDEN LIGHTING - Serene and balanced illumination
     let lights = [
-        // Main Eclipse light from above (dramatic red-orange)
+        // Overhead ambient light (soft white for natural feel)
         Light::new(
-            Vector3::new(0.0, 10.0, 0.0),
-            Color::new(255, 200, 150),
-            2.2
+            Vector3::new(0.0, 8.0, 0.0),
+            Color::new(240, 245, 255), // Cool white daylight
+            1.8
         ),
-        // Central crystal glow (red mystical light)
+        // Central water pool glow (blue-green reflection enhancer)
         Light::new(
-            Vector3::new(0.0, 3.5, 0.0),
-            Color::new(200, 50, 80),
-            1.5
+            Vector3::new(0.0, 2.5, 0.0),
+            Color::new(120, 180, 220), // Soft blue-cyan
+            1.2
         ),
-        // Corner pillar lights (warm metal glow) - optimized positions
+        // Corner tech tower lights (warm tech glow)
         Light::new(
-            Vector3::new(-3.0, 2.8, 3.0),
-            Color::new(255, 180, 120), // Warm orange glow
-            1.0
-        ),
-        Light::new(
-            Vector3::new(3.0, 2.8, 3.0),
-            Color::new(255, 180, 120), // Warm orange glow
-            1.0
+            Vector3::new(-2.5, 2.5, 2.5),
+            Color::new(200, 220, 255), // Cool tech blue
+            0.8
         ),
         Light::new(
-            Vector3::new(-3.0, 2.8, -3.0),
-            Color::new(255, 180, 120), // Warm orange glow
-            1.0
+            Vector3::new(2.5, 2.5, 2.5),
+            Color::new(200, 220, 255), // Cool tech blue
+            0.8
         ),
         Light::new(
-            Vector3::new(3.0, 2.8, -3.0),
-            Color::new(255, 180, 120), // Warm orange glow
-            1.0
+            Vector3::new(-2.5, 2.5, -2.5),
+            Color::new(200, 220, 255), // Cool tech blue
+            0.8
+        ),
+        Light::new(
+            Vector3::new(2.5, 2.5, -2.5),
+            Color::new(200, 220, 255), // Cool tech blue
+            0.8
         )
     ];
 
     while !window.window_should_close() {
-        // Enhanced camera controls for the Eclipse diorama
+        // Smooth camera controls for zen garden exploration
         if window.is_key_down(KeyboardKey::KEY_LEFT) || window.is_key_down(KeyboardKey::KEY_A) {
             camera.orbit(rotation_speed, 0.0);
         }

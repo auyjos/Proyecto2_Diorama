@@ -13,7 +13,52 @@ use std::f32::consts::PI;
 const SHADOW_BIAS: f32 = 1e-4;
 const MAX_RECURSION_DEPTH: i32 = 3;
 
-// Eclipse skybox function - Creates the dramatic Berserk Eclipse atmosphere
+// World-space AABB that bounds our diorama. Rays that don't enter this box will
+// skip object intersection entirely and sample the skybox. This creates a
+// compact, focused rendering area showing only the diorama like a microcube.
+const SCENE_MIN: Vector3 = Vector3 { x: -3.8, y: -1.0, z: -3.8 };
+const SCENE_MAX: Vector3 = Vector3 { x:  3.8, y:  3.2, z:  3.8 };
+
+#[inline]
+fn point_in_aabb(p: &Vector3, min: &Vector3, max: &Vector3) -> bool {
+    p.x >= min.x && p.x <= max.x &&
+    p.y >= min.y && p.y <= max.y &&
+    p.z >= min.z && p.z <= max.z
+}
+
+// Ray vs AABB using the slab method
+#[inline]
+fn ray_aabb_intersect(ro: &Vector3, rd: &Vector3, min: &Vector3, max: &Vector3) -> bool {
+    // Robust slab method with proper handling for near-zero components
+    let inv_x = if rd.x != 0.0 { 1.0 / rd.x } else { f32::INFINITY };
+    let inv_y = if rd.y != 0.0 { 1.0 / rd.y } else { f32::INFINITY };
+    let inv_z = if rd.z != 0.0 { 1.0 / rd.z } else { f32::INFINITY };
+
+    let mut t1 = (min.x - ro.x) * inv_x;
+    let mut t2 = (max.x - ro.x) * inv_x;
+    if t1 > t2 { std::mem::swap(&mut t1, &mut t2); }
+
+    let mut ty1 = (min.y - ro.y) * inv_y;
+    let mut ty2 = (max.y - ro.y) * inv_y;
+    if ty1 > ty2 { std::mem::swap(&mut ty1, &mut ty2); }
+
+    if (t1 > ty2) || (ty1 > t2) { return false; }
+    if ty1 > t1 { t1 = ty1; }
+    if ty2 < t2 { t2 = ty2; }
+
+    let mut tz1 = (min.z - ro.z) * inv_z;
+    let mut tz2 = (max.z - ro.z) * inv_z;
+    if tz1 > tz2 { std::mem::swap(&mut tz1, &mut tz2); }
+
+    if (t1 > tz2) || (tz1 > t2) { return false; }
+    if tz1 > t1 { t1 = tz1; }
+    if tz2 < t2 { t2 = tz2; }
+
+    // We consider an intersection only if the box is hit at t >= 0 (forward ray)
+    t2 >= 0.0
+}
+
+// Zen Cosmic skybox function - Creates a serene futuristic atmosphere
 fn skybox_color(ray_direction: &Vector3) -> Color {
     // Normalize ray direction
     let dir = ray_direction.normalized();
@@ -22,60 +67,79 @@ fn skybox_color(ray_direction: &Vector3) -> Color {
     let theta = dir.y.asin(); // Elevation angle (-π/2 to π/2)
     let phi = dir.z.atan2(dir.x); // Azimuthal angle (-π to π)
     
-    // Eclipse position (high in the sky, slightly offset)
-    let eclipse_theta = 0.7; // High elevation
-    let eclipse_phi = 0.2;   // Slightly to the right
+    // Cosmic nebula centers for depth
+    let nebula1_theta = 0.8; // High elevation
+    let nebula1_phi = 1.0;   // Eastern side
+    let nebula2_theta = -0.3; // Lower elevation
+    let nebula2_phi = -1.5;   // Western side
     
-    // Calculate angular distance to eclipse center
-    let d_theta = theta - eclipse_theta;
-    let d_phi = phi - eclipse_phi;
-    let angular_dist = (d_theta * d_theta + d_phi * d_phi).sqrt();
+    // Calculate distances to nebula centers
+    let d1_theta = theta - nebula1_theta;
+    let d1_phi = phi - nebula1_phi;
+    let dist1 = (d1_theta * d1_theta + d1_phi * d1_phi).sqrt();
     
-    // Eclipse parameters
-    let eclipse_radius = 0.15; // Size of the eclipse
-    let corona_radius = 0.25;  // Corona effect radius
+    let d2_theta = theta - nebula2_theta;
+    let d2_phi = phi - nebula2_phi;
+    let dist2 = (d2_theta * d2_theta + d2_phi * d2_phi).sqrt();
     
-    if angular_dist < eclipse_radius {
-        // Inside the eclipse - very dark with subtle red rim
-        if angular_dist > eclipse_radius * 0.8 {
-            // Red rim of the eclipse
-            return Color::new(80, 20, 10);
-        } else {
-            // Dark center
-            return Color::new(20, 5, 5);
-        }
-    } else if angular_dist < corona_radius {
-        // Corona effect - bright red/orange glow
-        let corona_factor = 1.0 - (angular_dist - eclipse_radius) / (corona_radius - eclipse_radius);
-        let intensity = (corona_factor * 255.0) as u8;
-        return Color::new(intensity, (intensity as f32 * 0.6) as u8, (intensity as f32 * 0.2) as u8);
-    }
+    // Nebula parameters
+    let nebula_radius = 0.6;
+    let nebula_intensity = 0.4;
     
-    // Sky gradient based on elevation
+    // Base cosmic gradient
     let elevation_factor = (theta + 1.57) / 3.14; // Normalize to 0-1
     
-    if elevation_factor > 0.7 {
-        // Upper sky - dark red/black
-        let factor = (elevation_factor - 0.7) / 0.3;
-        let r = (80.0 * (1.0 - factor) + 20.0 * factor) as u8;
-        let g = (20.0 * (1.0 - factor) + 5.0 * factor) as u8;
-        let b = (10.0 * (1.0 - factor) + 5.0 * factor) as u8;
+    let mut base_color = if elevation_factor > 0.8 {
+        // Deep space - dark blue with purple hints
+        let factor = (elevation_factor - 0.8) / 0.2;
+        let r = (15.0 * (1.0 - factor) + 25.0 * factor) as u8;
+        let g = (25.0 * (1.0 - factor) + 15.0 * factor) as u8;
+        let b = (45.0 * (1.0 - factor) + 55.0 * factor) as u8;
         Color::new(r, g, b)
-    } else if elevation_factor > 0.3 {
-        // Middle sky - deep red
-        let factor = (elevation_factor - 0.3) / 0.4;
-        let r = (120.0 * (1.0 - factor) + 80.0 * factor) as u8;
-        let g = (30.0 * (1.0 - factor) + 20.0 * factor) as u8;
-        let b = (15.0 * (1.0 - factor) + 10.0 * factor) as u8;
+    } else if elevation_factor > 0.4 {
+        // Mid sky - gentle blue gradient
+        let factor = (elevation_factor - 0.4) / 0.4;
+        let r = (30.0 * (1.0 - factor) + 15.0 * factor) as u8;
+        let g = (45.0 * (1.0 - factor) + 25.0 * factor) as u8;
+        let b = (80.0 * (1.0 - factor) + 45.0 * factor) as u8;
         Color::new(r, g, b)
     } else {
-        // Lower sky/horizon - darker red with some orange
-        let factor = elevation_factor / 0.3;
-        let r = (60.0 * factor + 40.0 * (1.0 - factor)) as u8;
-        let g = (15.0 * factor + 8.0 * (1.0 - factor)) as u8;
-        let b = (8.0 * factor + 5.0 * (1.0 - factor)) as u8;
+        // Horizon - warmer cosmic tones
+        let factor = elevation_factor / 0.4;
+        let r = (45.0 * factor + 35.0 * (1.0 - factor)) as u8;
+        let g = (55.0 * factor + 40.0 * (1.0 - factor)) as u8;
+        let b = (85.0 * factor + 65.0 * (1.0 - factor)) as u8;
         Color::new(r, g, b)
+    };
+    
+    // Add cyan nebula effect (complements zen water)
+    if dist1 < nebula_radius {
+        let nebula_factor = 1.0 - (dist1 / nebula_radius);
+        let intensity = nebula_factor * nebula_intensity;
+        base_color.r = ((base_color.r as f32) * (1.0 - intensity) + 60.0 * intensity) as u8;
+        base_color.g = ((base_color.g as f32) * (1.0 - intensity) + 120.0 * intensity) as u8;
+        base_color.b = ((base_color.b as f32) * (1.0 - intensity) + 140.0 * intensity) as u8;
     }
+    
+    // Add purple nebula effect (complements crystal refractions)
+    if dist2 < nebula_radius {
+        let nebula_factor = 1.0 - (dist2 / nebula_radius);
+        let intensity = nebula_factor * nebula_intensity;
+        base_color.r = ((base_color.r as f32) * (1.0 - intensity) + 100.0 * intensity) as u8;
+        base_color.g = ((base_color.g as f32) * (1.0 - intensity) + 50.0 * intensity) as u8;
+        base_color.b = ((base_color.b as f32) * (1.0 - intensity) + 120.0 * intensity) as u8;
+    }
+    
+    // Add subtle stars effect with noise
+    let star_noise = ((phi * 50.0).sin() * (theta * 30.0).cos() * (phi * theta * 100.0).sin()).abs();
+    if star_noise > 0.98 {
+        let star_intensity = (star_noise - 0.98) / 0.02;
+        base_color.r = (base_color.r as f32 + 40.0 * star_intensity) as u8;
+        base_color.g = (base_color.g as f32 + 40.0 * star_intensity) as u8;
+        base_color.b = (base_color.b as f32 + 40.0 * star_intensity) as u8;
+    }
+    
+    base_color
 }
 
 // Enum to handle different object types
@@ -198,6 +262,15 @@ pub fn cast_ray(
 ) -> Color {
     if depth <= 0 {
         return Color::new(0, 0, 0); // Negro si alcanzamos máxima profundidad
+    }
+
+    // Scene culling: if the ray origin is outside the scene AABB and the ray
+    // doesn't intersect the AABB, skip object tests and sample the skybox.
+    // This preserves the skybox while limiting rendering to our diorama.
+    if !point_in_aabb(ray_origin, &SCENE_MIN, &SCENE_MAX) {
+        if !ray_aabb_intersect(ray_origin, ray_direction, &SCENE_MIN, &SCENE_MAX) {
+            return skybox_color(ray_direction);
+        }
     }
 
     let mut intersect = Intersect::empty();
