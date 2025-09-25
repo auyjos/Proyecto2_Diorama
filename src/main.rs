@@ -121,8 +121,8 @@ fn main() {
     ));
     
     // === INSTALLATION 2: NORTHEAST ZEN GARDEN ===
-    // Combines: Moss + Crystal + Water + Metal
-    // Theme: Natural meditation area with technological accents
+    // Combines: Moss + Crystal + Water + Metal + Vertical Bamboo
+    // Theme: Natural meditation area with technological accents and bamboo grove
     
     // Moss garden cluster
     objects.push(Object::Cube(
@@ -135,6 +135,67 @@ fn main() {
     ));
     objects.push(Object::Cube(
         Cube::new(Vector3::new(3.0, -0.5, 4.0), 0.6, Material::zen_moss())
+            .with_texture(1)
+    ));
+    
+    // === BAMBOO GROVE - Vertical Elements ===
+    // Tall bamboo stalks using elongated cubes with zen_moss material - CONNECTED SEGMENTS
+    
+    // Main bamboo stalk (tallest - 6 segments, properly stacked)
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(4.2, -0.3, 3.8), 0.4, Material::zen_moss())
+            .with_texture(1)
+    ));
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(4.2, 0.1, 3.8), 0.4, Material::zen_moss())
+            .with_texture(1)
+    ));
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(4.2, 0.5, 3.8), 0.35, Material::zen_moss())
+            .with_texture(1)
+    ));
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(4.2, 0.875, 3.8), 0.35, Material::zen_moss())
+            .with_texture(1)
+    ));
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(4.2, 1.225, 3.8), 0.3, Material::zen_moss())
+            .with_texture(1)
+    ));
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(4.2, 1.525, 3.8), 0.25, Material::zen_moss())
+            .with_texture(1)
+    ));
+    
+    // Second bamboo stalk (medium height - 4 segments, properly stacked)
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(3.8, -0.3, 4.2), 0.35, Material::zen_moss())
+            .with_texture(1)
+    ));
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(3.8, 0.05, 4.2), 0.35, Material::zen_moss())
+            .with_texture(1)
+    ));
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(3.8, 0.4, 4.2), 0.3, Material::zen_moss())
+            .with_texture(1)
+    ));
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(3.8, 0.7, 4.2), 0.25, Material::zen_moss())
+            .with_texture(1)
+    ));
+    
+    // Third bamboo stalk (shorter - 3 segments, properly stacked)
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(3.2, -0.3, 3.7), 0.4, Material::zen_moss())
+            .with_texture(1)
+    ));
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(3.2, 0.1, 3.7), 0.35, Material::zen_moss())
+            .with_texture(1)
+    ));
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(3.2, 0.425, 3.7), 0.3, Material::zen_moss())
             .with_texture(1)
     ));
     
@@ -157,7 +218,7 @@ fn main() {
     ));
     
     // === INSTALLATION 3: SOUTHWEST TECH GROVE ===
-    // Combines: Metal + Chrome + Crystal + Moss
+    // Combines: Metal + Chrome + Crystal + Moss + Vertical Tech Spire
     // Theme: Technology integrated with nature
     
     // Metal platform base
@@ -169,6 +230,33 @@ fn main() {
     // Chrome tech panel
     objects.push(Object::Cube(
         Cube::new(Vector3::new(-3.5, -0.2, -3.5), 1.0, Material::chrome_mirror())
+            .with_texture(5)
+    ));
+    
+    // === TECH SPIRE - Vertical Metal Antenna ===
+    // Sleek metal spire for tech aesthetics - CONNECTED SEGMENTS
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(-3.8, -0.375, -3.8), 0.25, Material::brushed_metal())
+            .with_texture(2)
+    ));
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(-3.8, -0.125, -3.8), 0.25, Material::brushed_metal())
+            .with_texture(2)
+    ));
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(-3.8, 0.125, -3.8), 0.25, Material::brushed_metal())
+            .with_texture(2)
+    ));
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(-3.8, 0.375, -3.8), 0.2, Material::brushed_metal())
+            .with_texture(2)
+    ));
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(-3.8, 0.575, -3.8), 0.2, Material::chrome_mirror())
+            .with_texture(5)
+    ));
+    objects.push(Object::Cube(
+        Cube::new(Vector3::new(-3.8, 0.75, -3.8), 0.15, Material::chrome_mirror())
             .with_texture(5)
     ));
     
