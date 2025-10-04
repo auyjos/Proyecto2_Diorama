@@ -9,6 +9,7 @@ use crate::sphere::Sphere;
 use crate::cube::Cube;
 use crate::texture::Texture;
 use std::f32::consts::PI;
+use rayon::prelude::*;
 
 const SHADOW_BIAS: f32 = 1e-4;
 const MAX_RECURSION_DEPTH: i32 = 3;
@@ -372,34 +373,53 @@ pub fn render(
     lights: &[Light],
     textures: &[Texture]
 ) {
-    let width = framebuffer.width() as f32;
-    let height = framebuffer.height() as f32;
-    let aspect_ratio = width / height;
+    let width = framebuffer.width() as usize;
+    let height = framebuffer.height() as usize;
+    let aspect_ratio = width as f32 / height as f32;
     let fov = PI / 3.0;
     let perspective_scale = (fov * 0.5).tan();
 
-    for y in 0..framebuffer.height() {
-        for x in 0..framebuffer.width() {
-            // Map the pixel coordinate to screen space [-1, 1]
-            let screen_x = (2.0 * x as f32) / width - 1.0;
-            let screen_y = -(2.0 * y as f32) / height + 1.0;
+    // Create a buffer to store all pixel colors
+    // This allows parallel computation without concurrent writes to framebuffer
+    let pixels: Vec<(u32, u32, Color)> = (0..height)
+        .into_par_iter()
+        .flat_map(|y| {
+            (0..width)
+                .into_par_iter()
+                .map(move |x| {
+                    // Map the pixel coordinate to screen space [-1, 1]
+                    let screen_x = (2.0 * x as f32) / width as f32 - 1.0;
+                    let screen_y = -(2.0 * y as f32) / height as f32 + 1.0;
 
-            // Adjust for aspect ratio and perspective 
-            let screen_x = screen_x * aspect_ratio * perspective_scale;
-            let screen_y = screen_y * perspective_scale;
+                    // Adjust for aspect ratio and perspective 
+                    let screen_x = screen_x * aspect_ratio * perspective_scale;
+                    let screen_y = screen_y * perspective_scale;
 
-            // Calculate the direction of the ray for this pixel
-            let mut ray_direction = Vector3::new(screen_x, screen_y, -1.0);
-            ray_direction.normalize();
+                    // Calculate the direction of the ray for this pixel
+                    let mut ray_direction = Vector3::new(screen_x, screen_y, -1.0);
+                    ray_direction.normalize();
 
-            // Apply camera rotation to the ray direction
-            let rotated_direction = camera.basis_change(&ray_direction);
+                    // Apply camera rotation to the ray direction
+                    let rotated_direction = camera.basis_change(&ray_direction);
 
-            // Cast the ray and get the pixel color
-            let pixel_color = cast_ray(&camera.eye, &rotated_direction, objects, lights, textures, MAX_RECURSION_DEPTH);
+                    // Cast the ray and get the pixel color
+                    let pixel_color = cast_ray(
+                        &camera.eye, 
+                        &rotated_direction, 
+                        objects, 
+                        lights, 
+                        textures, 
+                        MAX_RECURSION_DEPTH
+                    );
 
-            // Draw the pixel on screen with the returned color
-            framebuffer.set_pixel_with_color(x as u32, y as u32, pixel_color);
-        }
+                    (x as u32, y as u32, pixel_color)
+                })
+                .collect::<Vec<_>>()
+        })
+        .collect();
+
+    // Write all computed pixels to the framebuffer (sequential, but fast)
+    for (x, y, color) in pixels {
+        framebuffer.set_pixel_with_color(x, y, color);
     }
 }

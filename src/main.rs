@@ -28,7 +28,7 @@ fn main() {
 
     let (mut window, raylib_thread) = raylib::init()
         .size(window_width, window_height)
-        .title("Rust Graphics - Raytracer with Reflections & Refractions")
+        .title("Rust Graphics - Modern Zen Garden")
         .log_level(TraceLogLevel::LOG_WARNING)
         .resizable()
         .build();
